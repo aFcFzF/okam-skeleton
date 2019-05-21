@@ -1,6 +1,6 @@
 <template>
     <div :class="sknCls">
-        <div class="placeholder" v-if="placeholder && showPlaceholder">
+        <div class="placeholder-wrap" v-if="placeholder && showPlaceholder">
             <slot name="placeholder"></slot>
         </div>
         <div class="screen-skeleton-wrap">
@@ -16,10 +16,9 @@ prefix = '.screen-skeleton'
     height 100%
     position relative
 
-    .placeholder
+    .placeholder-wrap
         position absolute
         top 0
-        height 0
         width 100%
         height 100%
         z-index -1
@@ -67,7 +66,7 @@ export default {
          */
         fade: {
             type: Boolean,
-            default: true
+            default: false
         },
 
         /**
@@ -91,21 +90,28 @@ export default {
     data() {
         return {
             // showLoading: this.loading // okam初始化顺序不对？
-            // 控制骨架图至少展示1.2s
+            // 控制骨架图至少展示1s
             showLoading: true,
             // 和placeholderHideOrder有关
-            showPlaceholder: true
+            showPlaceholder: true,
+            // 1200ms之后是否有fade效果
+            showFade: false,
+            // loading开始时间
+            startTime: Date.now()
         };
     },
 
     watch: {
-        // 骨架图至少展示1秒，防止主界面因资源没加载完抖动
+        // 骨架图至少展示1.2秒，防止主界面因资源没加载完抖动
         loading(val) {
             if (!val) {
+                // this.showFade = this.fade;
+                const remain = 1200 - (Date.now() - this.startTime);
+                // chrome 和 ios 设置delay < 0 没问题，但安卓会不触发。
                 setTimeout(() => {
                     this.showLoading = val;
                     setTimeout(() => this.showPlaceholder = val, this.delaySknHide);
-                }, 1200);
+                }, remain >= 0 && remain || 0);
             }
             else {
                 this.showLoading = this.showPlaceholder = val;
@@ -134,6 +140,7 @@ export default {
     created() {
         this.showLoading = true;
         this.showPlaceholder = this.placeholder;
+        // this.showFade = false;
     }
 };
 </script>
