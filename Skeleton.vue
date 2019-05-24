@@ -1,9 +1,9 @@
 <template>
     <div :class="sknCls">
-        <div class="placeholder-wrap" v-if="placeholder && showPlaceholder">
+        <div class="placeholder-wrap">
             <slot name="placeholder"></slot>
         </div>
-        <div class="screen-skeleton-wrap">
+        <div class="content-wrap" style="opacity: 0">
             <slot></slot>
         </div>
     </div>
@@ -15,24 +15,29 @@ prefix = '.screen-skeleton'
 {prefix}
     height 100%
     position relative
+    overflow hidden
 
     .placeholder-wrap
         position absolute
         top 0
-        width 100%
-        height 100%
-        z-index -1
-
-    &-wrap
-        opacity 1
+        left 0
+        right 0
+        bottom 0
+        z-index 10
+        overflow hidden
+        opacity 0
 
     &.loading
-        {prefix}-wrap
-            opacity 0
+        .placeholder-wrap
+            opacity 1
 
     &.fade
-        {prefix}-wrap
+        .placeholder-wrap
             transition opacity .3s
+
+    &.show
+        .content-wrap
+            opacity 1 !important
 </style>
 
 <script>
@@ -48,13 +53,8 @@ export default {
             default: 'full'
         },
 
-        placeholder: {
-            type: Boolean,
-            default: false
-        },
-
         /**
-         * 是否显示加载动画
+         * 是否显示加载动画(首屏需改进)
          */
         active: {
             type: Boolean,
@@ -67,14 +67,6 @@ export default {
         fade: {
             type: Boolean,
             default: false
-        },
-
-        /**
-         * 延迟骨架消失,单位ms。场景：骨架完全贴合且具有过渡效果
-         */
-        delaySknHide: {
-            type: Number,
-            default: 0
         },
 
         /**
@@ -105,16 +97,12 @@ export default {
         // 骨架图至少展示1.2秒，防止主界面因资源没加载完抖动
         loading(val) {
             if (!val) {
-                // this.showFade = this.fade;
                 const remain = 1200 - (Date.now() - this.startTime);
                 // chrome 和 ios 设置delay < 0 没问题，但安卓会不触发。
-                setTimeout(() => {
-                    this.showLoading = val;
-                    setTimeout(() => this.showPlaceholder = val, this.delaySknHide);
-                }, remain >= 0 && remain || 0);
+                setTimeout(() => this.showLoading = val, remain >= 0 && remain || 0);
             }
             else {
-                this.showLoading = this.showPlaceholder = val;
+                this.showLoading = val;
             }
         }
     },
@@ -123,24 +111,14 @@ export default {
         sknCls() {
             return [
                 'screen-skeleton',
-                this.showLoading ? 'loading' : '',
+                this.showLoading ? 'loading' : 'show',
                 this.fade ? 'fade' : ''
             ];
         }
-        // sknSyl() {
-        //     const pathResolve = url => (/^http/.test(url) ? url : '../../' + url);
-        //     const bg = this.placeholder ? pathResolve(this.placeholder) : 'unset';
-        //     return {
-        //         'background-image': this.showLoading ? `url(${bg})` : 'unset',
-        //         'background-size': this.showLoading ? '100% auto' : 'unset'
-        //     };
-        // }
     },
 
     created() {
         this.showLoading = true;
-        this.showPlaceholder = this.placeholder;
-        // this.showFade = false;
     }
 };
 </script>
