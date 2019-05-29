@@ -43,7 +43,7 @@
 $gray = #f2f2f2
 
 .skeleton-item
-    padding 24px 0
+    padding 36px 0
 
     .gray
         background $gray
@@ -55,12 +55,12 @@ $gray = #f2f2f2
             background-position-y 50%
     .row
         height 48px
-        margin 15px 0
+        margin-top 30px
         line-height 1.2
 
     .title
         margin 0
-        margin-bottom 30px
+        margin-bottom 36px
 
     .content
         display flex
@@ -81,7 +81,6 @@ $gray = #f2f2f2
 
                 .paragraph
                     width 100%
-                    // align-items center
 
                     .row
                         margin-top 30px
@@ -137,7 +136,7 @@ $gray = #f2f2f2
 
 <script>
 export default {
-    name: 'Paragraph',
+    name: 'Placeholder',
     /* eslint-disable fecs-properties-quote */
     props: {
         title: {
@@ -187,10 +186,6 @@ export default {
             type: Boolean,
             default: false
         },
-        active: {
-            type: Boolean,
-            default: false
-        },
         size: {
             type: String,
             validator(val) {
@@ -210,9 +205,8 @@ export default {
 
     data() {
         return {
-            // active动画相关
             activeBgPos: 100,
-            activeTimer: null
+            active: false
         };
     },
 
@@ -257,29 +251,9 @@ export default {
         }
     },
 
-    watch: {
-        active(val) {
-            if (!val) {
-                clearInterval(this.activeTimer);
-                this.activeBgPos = 100;
-            }
-            else {
-                this.startActive();
-            }
-        }
-    },
-
-    methods: {
-        startActive() {
-            this.activeTimer = setInterval(() => {
-                const val = this.activeBgPos;
-                this.activeBgPos = val === 100 ? 0 : 100;
-            }, 800);
-        }
-    },
-
-    mounted() {
-        this.active && this.startActive();
+    created() {
+        this.$onBroadcast('activeChanged.Placeholder', status => this.active = status);
+        this.$onBroadcast('activeBgPosChanged.Placeholder', val => this.activeBgPos = val);
     }
 };
 </script>

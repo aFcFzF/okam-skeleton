@@ -1,6 +1,6 @@
 <template>
     <div :class="sknCls">
-        <div class="placeholder-wrap">
+        <div class="placeholder-wrap" ref="wrap">
             <slot name="placeholder"></slot>
         </div>
         <div class="content-wrap" style="opacity: 0">
@@ -72,6 +72,14 @@ export default {
         loading: {
             type: Boolean,
             default: true
+        },
+
+        /**
+         * 切换动画效果
+         */
+        active: {
+            type: Boolean,
+            default: false
         }
         /* eslint-enable fecs-properties-quote */
     },
@@ -82,7 +90,10 @@ export default {
             // 控制骨架图至少展示.4s
             showLoading: true,
             // loading开始时间
-            startTime: Date.now()
+            startTime: Date.now(),
+            // 控制子placeholder动画时间
+            activeBgPos: 100,
+            activeTimer: null
         };
     },
 
@@ -92,10 +103,26 @@ export default {
             if (!val) {
                 const remain = 400 - (Date.now() - this.startTime);
                 // chrome 和 ios 设置delay < 0 没问题，但安卓会不触发。
-                setTimeout(() => this.showLoading = val, remain > 0 ? remain : 0);
+                setTimeout(() => {
+                    this.showLoading = val;
+                    this.$emit('statusChanged', val);
+                }, remain > 0 ? remain : 0);
             }
             else {
                 this.showLoading = val;
+                this.$emit('statusChanged', val);
+            }
+        },
+        active(val) {
+            if (!val) {
+                clearInterval(this.activeTimer);
+                this.activeBgPos = 100;
+                this.$broadcast('activeChanged.Placeholder', false);
+                this.$broadcast('activeBgPosChanged.Placeholder', 100);
+            }
+            else {
+                this.startActive();
+                this.$broadcast('activeChanged.Placeholder', true);
             }
         }
     },
@@ -110,8 +137,20 @@ export default {
         }
     },
 
+    methods: {
+        startActive() {
+            this.activeTimer = setInterval(() => {
+                const val = this.activeBgPos;
+                const pos = this.activeBgPos = val === 100 ? 0 : 100;
+                this.$emit('bgPosChange', pos);
+                this.$broadcast('activeBgPosChanged.Placeholder', pos);
+            }, 800);
+        }
+    },
+
     created() {
         this.showLoading = true;
+        this.active && this.startActive();
     }
 };
 </script>
