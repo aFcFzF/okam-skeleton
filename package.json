@@ -1,0 +1,20 @@
+{
+  "name": "okam-skeleton",
+  "version": "0.0.8",
+  "description": "a miniProg skeleton component",
+  "main": "Skeleton.vue",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aFcFzF/okam-skeleton.git"
+  },
+  "keywords": [],
+  "author": "afcfzf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aFcFzF/okam-skeleton/issues"
+  },
+  "homepage": "https://github.com/aFcFzF/okam-skeleton#readme"
+}
