@@ -7,7 +7,7 @@
             :style="{
                 width: titleWidth,
                 backgroundPositionX: activeBgPos + '%',
-                transition: activeBgPos === 0 ? 'background linear 800ms' : ''
+                transition: activeBgPos === 0 ? 'background linear 800ms' : false
             }"
         >
         </p>
@@ -18,7 +18,7 @@
                     v-if="avatar"
                     :style="{
                         backgroundPositionX: activeBgPos + '%',
-                        transition: activeBgPos === 0 ? 'background linear 800ms' : ''
+                        transition: activeBgPos === 0 ? 'background linear 800ms' : false
                     }"
                 ></div>
                 <ul :class="['paragraph', align]" v-if="paragraph">
@@ -30,7 +30,7 @@
                             marginTop: !vertical && idx === 0 ? '0px' : false,
                             width: rowsWdt[v],
                             backgroundPositionX: activeBgPos + '%',
-                            transition: activeBgPos === 0 ? 'background linear 800ms' : ''
+                            transition: activeBgPos === 0 ? 'background linear 800ms' : false
                         }"
                     ></li>
                 </ul>
@@ -97,7 +97,7 @@ $gray = #f2f2f2
                 flex-direction column
                 flex-grow 1
                 flex-shrink 0
-                align-self stretch
+                align-self flex-start
 
                 &.center
                     align-self center
@@ -110,7 +110,7 @@ $gray = #f2f2f2
                 width 120px
                 height 120px
                 border-radius 50%
-                margin-right 25px
+                margin-right 30px
 
                 &.small
                     width 90px

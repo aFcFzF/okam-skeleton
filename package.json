@@ -1,6 +1,6 @@
 {
   "name": "okam-skeleton",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "a miniProg skeleton component",
   "main": "Skeleton.vue",
   "scripts": {

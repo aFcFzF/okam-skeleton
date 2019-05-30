@@ -1,8 +1,9 @@
 <template>
-    <div :class="sknCls">
-        <div class="placeholder-wrap" ref="wrap">
+    <div :class="sknCls" :style="{height}">
+        <div class="placeholder-wrap" ref="placeWrap">
             <slot name="placeholder"></slot>
         </div>
+        <!-- 直接对内容opacity 0是防止内容先于骨架屏渲染出来 -->
         <div class="content-wrap" style="opacity: 0">
             <slot></slot>
         </div>
@@ -10,19 +11,28 @@
 </template>
 
 <style lang="stylus" scoped>
-prefix = '.screen-skeleton'
+clearfix()
+    &::before,
+    &::after
+        content ''
+        display table
 
-{prefix}
-    height 100%
+    &::before
+        clear both
+
+    zoom 1
+
+.screen-skeleton
     position relative
+    clearfix()
 
     .placeholder-wrap
         position absolute
         top 0
+        bottom 0
         left 0
         right 0
-        bottom 0
-        z-index 10
+        z-index 9
         opacity 0
         visibility hidden
 
@@ -35,6 +45,9 @@ prefix = '.screen-skeleton'
         .placeholder-wrap
             transition opacity .3s linear, visibility .3s .2s
 
+    &.overflow
+        overflow hidden
+
     &.show
         overflow visible
 
@@ -43,23 +56,21 @@ prefix = '.screen-skeleton'
 </style>
 
 <script>
-
 export default {
     /* eslint-disable fecs-properties-quote */
     name: 'Skeleton',
 
     props: {
         /**
-         * 展示类型
-         * 0. 首屏 1.
+         * 是否显示骨架
          */
-        type: {
-            type: String,
-            default: 0
+        loading: {
+            type: Boolean,
+            default: true
         },
 
         /**
-         * 骨架图切换实体fade效果
+         * 骨架屏切换实体fade效果
          */
         fade: {
             type: Boolean,
@@ -67,11 +78,19 @@ export default {
         },
 
         /**
-         * 是否显示骨架
+         * 只展示1屏
          */
-        loading: {
+        overflow: {
             type: Boolean,
-            default: true
+            default: false
+        },
+
+        /**
+         * 骨架屏大小, 默认全屏
+         */
+        height: {
+            type: String,
+            default: '100vh'
         },
 
         /**
@@ -87,10 +106,12 @@ export default {
     data() {
         return {
             // showLoading: this.loading // okam初始化顺序不对？
-            // 控制骨架图至少展示.4s
+            // 控制骨架屏至少展示600ms
             showLoading: true,
             // loading开始时间
-            startTime: Date.now(),
+            startTime: 0,
+            // fade第二帧加上去，避免首次出现
+            showFade: false,
             // 控制子placeholder动画时间
             activeBgPos: 100,
             activeTimer: null
@@ -98,27 +119,29 @@ export default {
     },
 
     watch: {
-        // 骨架图至少展示400毫秒，防止主界面因资源没加载完抖动
+        // 骨架屏至少展示600毫秒，防止主界面因资源没加载完抖动
         loading(val) {
             if (!val) {
-                const remain = 400 - (Date.now() - this.startTime);
+                this.showFade = this.fade;
+                const remain = 600 - (Date.now() - this.startTime);
+                const delay = remain > 0 ? remain : 0;
                 // chrome 和 ios 设置delay < 0 没问题，但安卓会不触发。
                 setTimeout(() => {
                     this.showLoading = val;
                     this.$emit('statusChanged', val);
-                }, remain > 0 ? remain : 0);
+                }, delay);
             }
             else {
                 this.showLoading = val;
+                setTimeout(() => this.showFade = this.fade, 100);
                 this.$emit('statusChanged', val);
             }
         },
         active(val) {
             if (!val) {
                 clearInterval(this.activeTimer);
-                this.activeBgPos = 100;
                 this.$broadcast('activeChanged.Placeholder', false);
-                this.$broadcast('activeBgPosChanged.Placeholder', 100);
+                this.$broadcast('activeBgPosChanged.Placeholder', this.activeBgPos = 100);
             }
             else {
                 this.startActive();
@@ -132,25 +155,34 @@ export default {
             return [
                 'screen-skeleton',
                 this.showLoading ? 'loading' : 'show',
-                this.fade ? 'fade' : ''
+                this.showFade ? 'fade' : '',
+                this.overflow ? 'overflow' : ''
             ];
         }
     },
 
     methods: {
         startActive() {
-            this.activeTimer = setInterval(() => {
+            const proc = () => {
                 const val = this.activeBgPos;
                 const pos = this.activeBgPos = val === 100 ? 0 : 100;
                 this.$emit('bgPosChange', pos);
                 this.$broadcast('activeBgPosChanged.Placeholder', pos);
-            }, 800);
+                this.activeTimer = setTimeout(proc, 800);
+            };
+            proc();
         }
     },
 
     created() {
-        this.showLoading = true;
+        this.showLoading = this.loading;
         this.active && this.startActive();
+        this.startTime = Date.now();
+    },
+
+    mounted() {
+        // 挂载后添加fade效果，避免闪屏
+        setTimeout(() => this.showFade = this.fade, 100);
     }
 };
 </script>
