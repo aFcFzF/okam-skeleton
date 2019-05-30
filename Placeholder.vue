@@ -50,7 +50,7 @@ $gray = #f2f2f2
 
     &.active
         .gray
-            background linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 37%, #f2f2f2 63%)
+            background linear-gradient(90deg, $gray 25%, #e6e6e6 37%, $gray 63%)
             background-size 400% 100%
             background-position-y 50%
     .row
