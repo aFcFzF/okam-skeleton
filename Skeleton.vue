@@ -111,10 +111,7 @@ export default {
             // loading开始时间
             startTime: 0,
             // fade第二帧加上去，避免首次出现
-            showFade: false,
-            // 控制子placeholder动画时间
-            activeBgPos: 100,
-            activeTimer: null
+            showFade: false
         };
     },
 
@@ -138,15 +135,7 @@ export default {
             }
         },
         active(val) {
-            if (!val) {
-                clearInterval(this.activeTimer);
-                this.$broadcast('activeChanged.Placeholder', false);
-                this.$broadcast('activeBgPosChanged.Placeholder', this.activeBgPos = 100);
-            }
-            else {
-                this.startActive();
-                this.$broadcast('activeChanged.Placeholder', true);
-            }
+            this.$broadcast('activeChanged.Placeholder', val);
         }
     },
 
@@ -161,22 +150,8 @@ export default {
         }
     },
 
-    methods: {
-        startActive() {
-            const proc = () => {
-                const val = this.activeBgPos;
-                const pos = this.activeBgPos = val === 100 ? 0 : 100;
-                this.$emit('bgPosChange', pos);
-                this.$broadcast('activeBgPosChanged.Placeholder', pos);
-                this.activeTimer = setTimeout(proc, 800);
-            };
-            proc();
-        }
-    },
-
     created() {
         this.showLoading = this.loading;
-        this.active && this.startActive();
         this.startTime = Date.now();
     },
 

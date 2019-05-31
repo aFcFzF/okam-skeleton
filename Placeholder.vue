@@ -4,23 +4,12 @@
         <p
             class="title gray row"
             v-if="title"
-            :style="{
-                width: titleWidth,
-                backgroundPositionX: activeBgPos + '%',
-                transition: activeBgPos === 0 ? 'background linear 800ms' : false
-            }"
+            :style="{width: titleWidth}"
         >
         </p>
-        <div :class="['content']" >
-            <div :class="['content-item', vertical ? 'vertical' : '']" v-for="col of colsCount" :key="'__index__' + col" :style="colSyl">
-                <div
-                    :class="['avatar', 'gray', shape, size, align]"
-                    v-if="avatar"
-                    :style="{
-                        backgroundPositionX: activeBgPos + '%',
-                        transition: activeBgPos === 0 ? 'background linear 800ms' : false
-                    }"
-                ></div>
+        <div :class="['content']">
+            <div :class="['content-item', vertical ? 'vertical' : '']" v-for="col of colsCount" :key="'_i_' + col" :style="colSyl">
+                <div :class="['avatar', 'gray', shape, size, align]" v-if="avatar"></div>
                 <ul :class="['paragraph', align]" v-if="paragraph">
                     <li
                         :class="['row', 'gray', align]"
@@ -28,9 +17,7 @@
                         :key="'_row_' + v"
                         :style="{
                             marginTop: !vertical && idx === 0 ? '0px' : false,
-                            width: rowsWdt[v],
-                            backgroundPositionX: activeBgPos + '%',
-                            transition: activeBgPos === 0 ? 'background linear 800ms' : false
+                            width: rowsWdt[v]
                         }"
                     ></li>
                 </ul>
@@ -45,14 +32,23 @@ $gray = #f2f2f2
 .skeleton-item
     padding 36px 0
 
-    .gray
-        background $gray
+    @keyframes bgAnimate
+        from
+            background-position-x 100%
 
-    &.active
-        .gray
-            background linear-gradient(90deg, $gray 25%, #e6e6e6 37%, $gray 63%)
-            background-size 400% 100%
-            background-position-y 50%
+        to
+            background-position-x 0%
+
+    .gray
+        background linear-gradient(90deg, $gray 25%, #e6e6e6 37%, $gray 63%)
+        background-size 400% 100%
+        background-position-y 50%
+        animation bgAnimate 1s linear infinite paused
+
+     &.active
+         .gray
+             animation-play-state running
+
     .row
         height 48px
         margin-top 30px
@@ -205,7 +201,6 @@ export default {
 
     data() {
         return {
-            activeBgPos: 100,
             active: false
         };
     },
@@ -253,7 +248,6 @@ export default {
 
     created() {
         this.$onBroadcast('activeChanged.Placeholder', status => this.active = status);
-        this.$onBroadcast('activeBgPosChanged.Placeholder', val => this.activeBgPos = val);
     }
 };
 </script>
